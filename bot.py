@@ -1,3 +1,4 @@
+import os
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -6,8 +7,8 @@ from telegram.ext import (
     ContextTypes,
 )
 
-# 🔑 TOKENINGNI YOZ
-TOKEN = "8374455405:AAHnP5XXSnQ5KL1zp63QNiYW_eyxgf6kiEs"
+# 🔑 TOKEN (Render Environment Variables dan olinadi)
+TOKEN = os.getenv("BOT_TOKEN")
 
 # 📐 LISTLAR
 LISTS = ["5.8kv", "5.0kv", "Xdf"]
@@ -47,12 +48,10 @@ ALL_MATERIALS = MATERIALS_415 + MATERIALS_335
 
 
 def make_keyboard(items, prefix):
-    keyboard = []
-    for item in items:
-        keyboard.append(
-            [InlineKeyboardButton(item, callback_data=f"{prefix}:{item}")]
-        )
-    return InlineKeyboardMarkup(keyboard)
+    return InlineKeyboardMarkup(
+        [[InlineKeyboardButton(item, callback_data=f"{prefix}:{item}")]
+         for item in items]
+    )
 
 
 # ▶️ START
@@ -68,7 +67,7 @@ async def list_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    _, list_name = query.data.split(":")
+    _, list_name = query.data.split(":", 1)
     context.user_data["list"] = list_name
 
     await query.message.reply_text(
@@ -82,8 +81,8 @@ async def material_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    _, material = query.data.split(":")
-    list_name = context.user_data.get("list", "—")
+    _, material = query.data.split(":", 1)
+    list_name = context.user_data.get("list")
 
     # 💰 NARX HISOBLASH
     if list_name == "5.0kv":
@@ -101,7 +100,7 @@ async def material_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         price = "Noma’lum"
 
     await query.message.reply_text(
-        f"✅ BUYURTMA:\n\n"
+        "✅ BUYURTMA:\n\n"
         f"📐 List: {list_name}\n"
         f"🪵 Material: {material}\n"
         f"💰 Narx: {price}"
@@ -117,7 +116,7 @@ def main():
     app.add_handler(CallbackQueryHandler(list_chosen, pattern="^list:"))
     app.add_handler(CallbackQueryHandler(material_chosen, pattern="^material:"))
 
-    print("🤖 Bot ishga tushdi...")
+    print("🤖 Bot ishga tushdi (PTB 20.7)")
     app.run_polling()
 
 
