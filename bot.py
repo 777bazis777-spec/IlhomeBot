@@ -1,4 +1,3 @@
-import os
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -7,7 +6,9 @@ from telegram.ext import (
     ContextTypes,
 )
 
-# 🔑 TOKEN (Render Environment Variables dan olinadi)
+import os
+
+# 🔑 TOKEN (Render Environment dan olinadi)
 TOKEN = os.getenv("BOT_TOKEN")
 
 # 📐 LISTLAR
@@ -15,33 +16,17 @@ LISTS = ["5.8kv", "5.0kv", "Xdf"]
 
 # 🪵 5.0kv — 415 000 so‘m
 MATERIALS_415 = [
-    "Izmir",
-    "Kamel",
-    "NyuJeckson",
-    "Berlin",
-    "Kanada",
-    "Malaziya",
-    "Dub yachmenniy",
-    "Karona 2025",
-    "Shpondoviy Arex",
-    "Varshava",
-    "Koxira",
-    "Marokash",
+    "Izmir", "Kamel", "NyuJeckson", "Berlin", "Kanada",
+    "Malaziya", "Dub yachmenniy", "Karona 2025",
+    "Shpondoviy Arex", "Varshava", "Koxira", "Marokash",
 ]
 
 # 🪵 5.0kv — 335 000 so‘m
 MATERIALS_335 = [
-    "Granit o'rta shagren",
-    "Chestorflit",
-    "Jekson Och",
-    "Chestorflit To'q",
-    "Conoma mat",
-    "Loft to'q shagren",
-    "Beliy korona mat",
-    "Cocna astana mat",
-    "Arusha vengi och",
-    "Beliy Jemchug",
-    "Pikkart",
+    "Granit o'rta shagren", "Chestorflit", "Jekson Och",
+    "Chestorflit To'q", "Conoma mat", "Loft to'q shagren",
+    "Beliy korona mat", "Cocna astana mat",
+    "Arusha vengi och", "Beliy Jemchug", "Pikkart",
 ]
 
 ALL_MATERIALS = MATERIALS_415 + MATERIALS_335
@@ -49,12 +34,11 @@ ALL_MATERIALS = MATERIALS_415 + MATERIALS_335
 
 def make_keyboard(items, prefix):
     return InlineKeyboardMarkup(
-        [[InlineKeyboardButton(item, callback_data=f"{prefix}:{item}")]
-         for item in items]
+        [[InlineKeyboardButton(i, callback_data=f"{prefix}:{i}")] for i in items]
     )
 
 
-# ▶️ START
+# ▶️ /start
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
         "📐 Listni tanlang:",
@@ -67,7 +51,7 @@ async def list_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    _, list_name = query.data.split(":", 1)
+    list_name = query.data.split(":")[1]
     context.user_data["list"] = list_name
 
     await query.message.reply_text(
@@ -81,10 +65,9 @@ async def material_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
     query = update.callback_query
     await query.answer()
 
-    _, material = query.data.split(":", 1)
+    material = query.data.split(":")[1]
     list_name = context.user_data.get("list")
 
-    # 💰 NARX HISOBLASH
     if list_name == "5.0kv":
         if material in MATERIALS_415:
             price = "415 000 so‘m"
@@ -100,7 +83,7 @@ async def material_chosen(update: Update, context: ContextTypes.DEFAULT_TYPE):
         price = "Noma’lum"
 
     await query.message.reply_text(
-        "✅ BUYURTMA:\n\n"
+        f"✅ BUYURTMA:\n\n"
         f"📐 List: {list_name}\n"
         f"🪵 Material: {material}\n"
         f"💰 Narx: {price}"
@@ -116,7 +99,7 @@ def main():
     app.add_handler(CallbackQueryHandler(list_chosen, pattern="^list:"))
     app.add_handler(CallbackQueryHandler(material_chosen, pattern="^material:"))
 
-    print("🤖 Bot ishga tushdi (PTB 20.7)")
+    print("🤖 Bot ishga tushdi...")
     app.run_polling()
 
 
